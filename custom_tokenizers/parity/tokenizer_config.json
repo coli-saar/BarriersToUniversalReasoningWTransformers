@@ -1,0 +1,64 @@
+{
+  "added_tokens_decoder": {
+    "0": {
+      "content": "<|padding|>",
+      "lstrip": false,
+      "normalized": false,
+      "rstrip": false,
+      "single_word": false,
+      "special": true
+    },
+    "1": {
+      "content": "<|endoftext|>",
+      "lstrip": false,
+      "normalized": false,
+      "rstrip": false,
+      "single_word": false,
+      "special": true
+    },
+    "2": {
+      "content": "<|unk|>",
+      "lstrip": false,
+      "normalized": false,
+      "rstrip": false,
+      "single_word": false,
+      "special": true
+    },
+    "418": {
+      "content": "<|trace|>",
+      "lstrip": false,
+      "normalized": false,
+      "rstrip": false,
+      "single_word": false,
+      "special": true
+    }
+  },
+  "backend": "custom",
+  "box_labels": [],
+  "eos_token": "<|endoftext|>",
+  "long_splits": {},
+  "loss_weights": {},
+  "max_start_index": 400,
+  "model_max_length": 1000000000000000019884624838656,
+  "pad_token": "<|padding|>",
+  "short_items": [
+    "0",
+    "1",
+    "E",
+    "O"
+  ],
+  "structure_words": [
+    "init",
+    "operation",
+    "swap",
+    "write",
+    "end",
+    "load",
+    "line",
+    "tape",
+    "."
+  ],
+  "tokenizer_class": "AlgorithmicTaskTokenizer",
+  "trace_token": "<|trace|>",
+  "unk_token": "<|unk|>"
+}
