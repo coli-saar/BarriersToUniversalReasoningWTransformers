@@ -13,6 +13,7 @@ fixed:
     delta_cot: True
   random_pos: True
   positional_encodings: ape_xsmall
+  best_ckpt: False
 
 sweep:
   seeds: [46,47,48,49,50]

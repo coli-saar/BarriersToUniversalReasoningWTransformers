@@ -1,0 +1,32 @@
+resources:
+  num_gpus: auto
+  master_port: auto
+  cleanup_models: false
+  cleanup_datasets: true
+
+fixed:
+  task: permutation
+  batch_size: 128
+  output_dir: /scratch/okraus/lenghtgen/models/
+  run_name_prefix: "sweep_"
+  minimum_lr: 0.1
+  task_kwargs:
+    num_objects: 5
+    include_indices: False
+    add_tape: False
+    shuffle_ops: False
+    add_load: False
+  random_pos: True
+  positional_encodings: ape_xsmall
+  best_ckpt: False
+
+sweep:
+  seeds: [45,46,47]
+  lengths: [30]
+  learning_rates: [3e-4,5e-4]
+  wdecays: [0.01,0.2]
+  warmup_ratios: [0.05]
+  rep_ratios: [0.25]
+  num_train_samples_list: [3000000]
+  pos_dropout_probs: [0.0]
+  target_bsizes: [256]

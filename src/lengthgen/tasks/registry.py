@@ -4,11 +4,11 @@ from typing import Callable
 
 from .implementations.boolean_eval import generate_boolean_dataset
 from .implementations.parity import generate_parity_dataset
+from .implementations.permutation import generate_permutation_dataset
 from .implementations.permutation_binary import generate_permutation_binary_dataset
 
 class TaskType(str, Enum):
     PERMUTATION = "permutation"
-    PERMUTATION_PROMPTING = "permutation_prompting"
     PERMUTATION_BINARY = "permutation_binary"
     BOOLEAN = "boolean"
     PARITY = "parity"
@@ -44,47 +44,38 @@ TASK_CONFIGS = {
             random_start_index=False,
         )
     ),
-
-    TaskType.PERMUTATION_BINARY: TaskConfig(
-        generator=generate_permutation_binary_dataset,
-        base_params=dict(
-            num_objects=5,
-            include_indices=False,
-            delta_cot=False,
-        ),
-        train_params=dict(
-            random_start_index=True,
-            repetitive_mix=True,
-            repetitive_mix_ratio=0.25,
-            shuffle_operations=True,
-        ),
-        val_params=dict(
-
-        ),
-    ),
-}
-
-'''
     TaskType.PERMUTATION: TaskConfig(
         generator=generate_permutation_dataset,
         base_params=dict(
             num_objects=5,
             include_indices=False,
-            delta_cot=False,
         ),
         train_params=dict(
-            random_start_index=True,
             repetitive_mix=True,
             repetitive_mix_ratio=0.2,
-            shuffle_operations=True,
         ),
         val_params=dict(
-            random_start_index=False,
-            shuffle_operations=False,
-            eval=True,
+            repetitive=False,
+            repetitive_mix=False
         ),
     ),
-'''
+    TaskType.PERMUTATION_BINARY: TaskConfig(
+        generator=generate_permutation_binary_dataset,
+        base_params=dict(
+            num_objects=5,
+            include_indices=False,
+        ),
+        train_params=dict(
+            repetitive_mix=True,
+            repetitive_mix_ratio=0.25,
+        ),
+        val_params=dict(
+            repetitive=False,
+            repetitive_mix=False
+        ),
+    ),
+}
+
 def get_task_generator(task_name):
     if isinstance(task_name, str):
         try:
