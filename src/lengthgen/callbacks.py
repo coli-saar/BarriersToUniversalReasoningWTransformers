@@ -91,12 +91,7 @@ class BatchedAccuracyCallback(TrainerCallback):
 
                 for j, text in enumerate(decoded):
                     pred = self.extract_generated_answer(text)
-                    if self.task == task_registry.TaskType.ADDITION or self.task == task_registry.TaskType.MULTIPLICATION or self.task == task_registry.TaskType.ADDITION_NEW:
-                        try:
-                            pred = normalize(pred)
-                            ground_truths[j] = normalize(ground_truths[j])
-                        except Exception as e: # in case there is no valid prediction (i.e. None)
-                            pass
+
                     if pred == ground_truths[j]:
                         correct += 1
                     if total < 2:

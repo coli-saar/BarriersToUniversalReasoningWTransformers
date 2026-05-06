@@ -396,6 +396,8 @@ def train(
         report_to="wandb",
         dataloader_num_workers=DATA_LOADER_NUM_WORKERS,
         remove_unused_columns=True,
+        bf16=torch.cuda.is_bf16_supported(),
+        fp16=not torch.cuda.is_bf16_supported(),
     )
 
     callback_list = [accuracy_callback, WandbConfigCallback(exp_config)]
