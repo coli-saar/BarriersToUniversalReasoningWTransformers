@@ -5,13 +5,13 @@ import random
 import re
 import torch
 
+from lengthgen.constants import TRACE_TOKEN, FINAL_ANSWER_TOKEN, PADDING_TOKEN, END_OF_TEXT_TOKEN
 from lengthgen.tasks import registry as task_registry
 from lengthgen.tasks.loader import load_split
+from lengthgen.paths import RESULTS_OUT_BASE_PATH
 from pathlib import Path
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from lengthgen.paths import RESULTS_OUT_BASE_PATH
-from lengthgen.constants import TRACE_TOKEN, FINAL_ANSWER_TOKEN, PADDING_TOKEN, END_OF_TEXT_TOKEN
 
 DEFAULT_OUT_LOCATION = RESULTS_OUT_BASE_PATH
 DEFAULT_OUT_LOCATION.mkdir(parents=True, exist_ok=True)
@@ -25,19 +25,19 @@ def normalize(s):
     return s.replace(" ", "")
 
 def evaluate_model(
-    model_path,
-    task="permutation",
-    min_len=15,
-    max_len=30,
-    step=1,
-    num_samples=100,
-    seed=4096,
+    model_path: str,
+    task: str = "permutation",
+    min_len: int = 15,
+    max_len: int = 30,
+    step: int = 1,
+    num_samples: int = 100,
+    seed: int = 4096,
     save_to_disk=True,
-    batch_size=32,
-    starting_aid=0,
-    task_kwargs="{}",
-    max_new_tokens=3200,
-    out_path=None,
+    batch_size: int = 32,
+    starting_aid: int = 0, # if this value 
+    task_kwargs: str = "{}",
+    max_new_tokens: int = 3200,
+    out_path: str = None,
 ):
     print(f"Evaluating model: {model_path}")
     random.seed(seed)
@@ -60,8 +60,13 @@ def evaluate_model(
     model = AutoModelForCausalLM.from_pretrained(model_path).to(device)
     current_vocab_size = model.get_input_embeddings().weight.shape[0]
     if len(tokenizer) > current_vocab_size:
-        print(f"WARNING: Tokenizer ({len(tokenizer)}) > Model ({current_vocab_size}). Resizing...")
-        model.resize_token_embeddings(len(tokenizer))
+        raise RuntimeError(
+            f"Tokenizer vocabulary ({len(tokenizer)}) is larger than the model's "
+            f"embedding table ({current_vocab_size}). This suggests the model "
+            f"checkpoint was not saved correctly after token embeddings were resized "
+            f"during training. Re-save the model with model.save_pretrained()."
+        )
+       
     model.eval()
     model_name = Path(model_path).name
 
@@ -75,7 +80,6 @@ def evaluate_model(
     print(f"Testing lengths: {test_lengths}")
     
     results = {}
-    extra_results = {}
     
     for length in test_lengths:
         print(f"Testing length {length}")
@@ -90,41 +94,30 @@ def evaluate_model(
         )
         
         correct = 0
-        checkpoint_correct = 0
         results_log = []
         
         prompts = []
         targets = []
-        extras = [] # Store ground truth metadata (e.g. checkpoint for multiplication)
         try:
             for i, item in enumerate(test_dataset):
                 text = item["text"]
                 
                 if TRACE_TOKEN in text:
                     prompt_part = text.split(TRACE_TOKEN)[0] + TRACE_TOKEN
-                    target_answer = text.split(f"{FINAL_ANSWER_TOKEN} ")[1].strip().replace(END_OF_TEXT_TOKEN, "")
+                    target_answer = text.split(f"{FINAL_ANSWER_TOKEN}")[-1].strip().replace(END_OF_TEXT_TOKEN, "")
                     if starting_aid > 0:
                         trace_remainder = text.split(TRACE_TOKEN)[1]
                         # Encode without special tokens so we only get the raw text tokens
                         trace_tokens = tokenizer.encode(trace_remainder, add_special_tokens=False)
                         aid_text = tokenizer.decode(trace_tokens[:starting_aid])
                         prompt_part += " " + aid_text
-                    # Check for Multiplication Grid in Ground Truth
-                    expected_checkpoint = None
-                    if "checkpoint:" in text:
-                        try:
-                            expected_checkpoint = text.split("checkpoint")[1].split("||")[0].strip()
-                        except IndexError:
-                            pass
 
                     prompts.append(prompt_part)
                     targets.append(target_answer)
-                    extras.append({"checkpoint": expected_checkpoint})
                 else:
                     print(f"Warning: Separator not found in sample {i}")
                     prompts.append(None)
                     targets.append(None)
-                    extras.append(None)
     
             num_batches = (len(prompts) + batch_size - 1) // batch_size
             for batch_idx in tqdm(range(num_batches), desc=f"Length {length}"):
@@ -133,7 +126,6 @@ def evaluate_model(
 
                 batch_prompts = prompts[start_idx:end_idx]
                 batch_targets = targets[start_idx:end_idx]
-                batch_extras = extras[start_idx:end_idx]
 
                 valid_indices = [i for i, p in enumerate(batch_prompts) if p is not None]
                 if not valid_indices:
@@ -141,7 +133,6 @@ def evaluate_model(
 
                 valid_prompts = [batch_prompts[i] for i in valid_indices]
                 valid_targets = [batch_targets[i] for i in valid_indices]
-                valid_extras = [batch_extras[i] for i in valid_indices]
 
                 inputs = tokenizer(
                     valid_prompts, 
@@ -158,54 +149,41 @@ def evaluate_model(
                     )
 
                 full_outs = tokenizer.batch_decode(outputs, skip_special_tokens=True)
-                for local_idx, (full_out, target_answer, extra) in enumerate(zip(full_outs, valid_targets, valid_extras)):
+                for local_idx, (full_out, target_answer) in enumerate(zip(full_outs, valid_targets)):
                     global_idx = start_idx + valid_indices[local_idx]
                     target_answer = target_answer.strip()
-                    try:
-                        prediction = full_out.split(f"{FINAL_ANSWER_TOKEN}")[1].strip()
-                    except IndexError:
+                    parts = full_out.split(FINAL_ANSWER_TOKEN)
+                    if len(parts) < 2:
                         prediction = "ERROR"
-
-                    is_checkpoint_correct = None
-                    if extra and extra["checkpoint"] is not None:
-                        try:
-                            pred_grid = full_out.split("checkpoint")[1].split("||")[0].strip()
-                            is_checkpoint_correct = (normalize(pred_grid) == normalize(extra["checkpoint"]))
-                        except IndexError:
-                            is_checkpoint_correct = False
-
-                    if task == task_registry.TaskType.ADDITION or task == task_registry.TaskType.MULTIPLICATION:
-                        try:
-                            prediction = normalize(prediction)
-                            target_answer = normalize(target_answer)
-                        except Exception as e: # in case there is no valid prediction (i.e. None)
-                            pass
+                        print(f"Warning: FINAL_ANSWER_TOKEN not found in output for sample {global_idx}")
+                    else:
+                        prediction = parts[-1].strip()
                     is_correct = (prediction == target_answer)
                     
                     if is_correct:
                         correct += 1
-                    if is_checkpoint_correct:
-                        checkpoint_correct += 1
 
                     if save_to_disk:
                         results_log.append({
                             "id": global_idx,
                             "correct": is_correct,
-                            "checkpoint_correct": is_checkpoint_correct,
                             "target": target_answer,
                             "prediction": prediction,
                             "full_output": full_out,
                             "prompt": valid_prompts[local_idx]
                         })
+        except torch.cuda.OutOfMemoryError:
+            raise
         except Exception as e:
-            print(e)
-        acc = correct / num_samples
+            print(f"Error at length {length}: {e}")
+            results[length] = None
+            continue
+        
+        # if there are malformed prompts for whatever reason, throw them out
+        valid_count = sum(1 for p in prompts if p is not None)
+        acc = correct / valid_count if valid_count > 0 else 0.0
         results[length] = acc
-        print(f"Length {length}: {acc:.2%} ({correct}/{num_samples})")
-        if task == task_registry.TaskType.MULTIPLICATION:
-            checkpoint_acc = checkpoint_correct / num_samples
-            extra_results[length] = checkpoint_acc
-            print(f"Length {length} - checkpoints: {checkpoint_acc:.2%} ({checkpoint_correct}/{num_samples})")
+        print(f"Length {length}: {acc:.2%} ({correct}/{valid_count})")
 
         if save_to_disk:
             filename = f"eval_{task}_len{length}{repetitive_str}.json"
@@ -215,17 +193,8 @@ def evaluate_model(
             print(f"Debug logs saved to: {save_path}")
 
     print("Final Results:")
-    if task == task_registry.TaskType.MULTIPLICATION:
-        data = []
-        for length in results.keys():
-            data.append({
-                "Length": length,
-                "Accuracy": results[length],
-                "Checkpoint Accuracy": extra_results.get(length, 0.0)
-            })
-        df = pd.DataFrame(data)
-    else:
-        df = pd.DataFrame(list(results.items()), columns=["Length", "Accuracy"])
+
+    df = pd.DataFrame(list(results.items()), columns=["Length", "Accuracy"])
     print(df)
     
     save_path = out_dir / f"full_results_{task}_{model_name}{repetitive_str}.csv"
