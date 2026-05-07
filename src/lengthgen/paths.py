@@ -17,5 +17,9 @@ RESULTS_OUT_BASE_PATH = Path(os.environ.get("RESULTS_BASE_PATH", REPO_ROOT / "re
 TRAIN_FILE_PATH = REPO_ROOT / "src" / "lengthgen" / "train.py"
 # path to the eval file
 EVAL_FILE_PATH = REPO_ROOT / "src" / "lengthgen" / "evaluate_model.py"
+# path to the prompting entry script
+PROMPTING_FILE_PATH = str(REPO_ROOT / "src" / "lengthgen" / "prompting.py")
+# path to prompt templates
+PROMPTS_BASE_PATH = Path(os.environ.get("PROMPTS_BASE_PATH", REPO_ROOT / "config" / "prompts"))
 # either read HF cache from env variable, or set custom path
 HF_CACHE_LOCATION = Path(os.environ.get("HF_CACHE_LOCATION", "/path/to/hf/cache"))

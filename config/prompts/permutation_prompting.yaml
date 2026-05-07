@@ -1,0 +1,92 @@
+instruction_base: 'You are a state-tracking agent evaluating the contents of boxes
+  labeled A through E. You are given an initial state (''init'') assigning an object
+  to each box, followed by a sequence of operations to swap the contents of two boxes.
+  You must track the state step-by-step. For each operation, you must repeat the swap
+  command, and then output ''write'' followed by the updated state of all boxes. When
+  the operation sequence  is fully resolved, output the final state from the last
+  operation. Finish your answer with ''end of result''. Follow this exact format and
+  do not output any natural language or any code. Below are examples of how to correctly
+  execute the operations. '
+instruction_index: 'You are a state-tracking agent evaluating the contents of boxes
+  labeled A through E. You are given an initial state (''init'') assigning an object
+  to each box, followed by a numbered sequence of operations to swap the contents
+  of two boxes. You must track the state step-by-step using the provided operation
+  indices. For each operation, you must repeat the numbered swap command, and then
+  output ''write'' followed by the updated state of all boxes. Use the index hints
+  to  find the correct swap operation in the trace. When the operation sequence is
+  fully resolved, output the final state from the last operation. Finish your answer
+  with ''end of result''. Follow this exact format and do not output any natural language
+  or any code. Below are examples of how to correctly execute the operations. '
+examples_base:
+- text: 'init A=Cat B=Hat C=Apple D=Dog E=Book operation swap B A . swap E A . swap
+    E D . swap A E . end . ### trace: swap contents B=Hat A=Cat. write A=Hat B=Cat
+    C=Apple D=Dog E=Book . swap contents E=Book A=Hat. write A=Book B=Cat C=Apple
+    D=Dog E=Hat . swap contents E=Hat D=Dog. write A=Book B=Cat C=Apple D=Hat E=Dog
+    . swap contents A=Book E=Dog. write A=Dog B=Cat C=Apple D=Hat E=Book . end  final
+    state: answer A=Dog B=Cat C=Apple D=Hat E=Book end of result'
+- text: 'init A=Cat B=Dog C=Hat D=Apple E=Book operation swap B D . swap E C . swap
+    A B . swap D C . swap C B . swap B C . end . ### trace: swap contents B=Dog D=Apple.
+    write A=Cat B=Apple C=Hat D=Dog E=Book . swap contents E=Book C=Hat. write A=Cat
+    B=Apple C=Book D=Dog E=Hat . swap contents A=Cat B=Apple. write A=Apple B=Cat
+    C=Book D=Dog E=Hat . swap contents D=Dog C=Book. write A=Apple B=Cat C=Dog D=Book
+    E=Hat . swap contents C=Dog B=Cat. write A=Apple B=Dog C=Cat D=Book E=Hat . swap
+    contents B=Dog C=Cat. write A=Apple B=Cat C=Dog D=Book E=Hat . end  final state:
+    answer A=Apple B=Cat C=Dog D=Book E=Hat end of result'
+- text: 'init A=Cat B=Hat C=Dog D=Book E=Apple operation swap E C . swap A D . swap
+    E A . swap D A . swap E C . end . ### trace: swap contents E=Apple C=Dog. write
+    A=Cat B=Hat C=Apple D=Book E=Dog . swap contents A=Cat D=Book. write A=Book B=Hat
+    C=Apple D=Cat E=Dog . swap contents E=Dog A=Book. write A=Dog B=Hat C=Apple D=Cat
+    E=Book . swap contents D=Cat A=Dog. write A=Cat B=Hat C=Apple D=Dog E=Book . swap
+    contents E=Book C=Apple. write A=Cat B=Hat C=Book D=Dog E=Apple . end  final state:
+    answer A=Cat B=Hat C=Book D=Dog E=Apple end of result'
+- text: 'init A=Hat B=Apple C=Book D=Cat E=Dog operation swap B C . swap A B . swap
+    A D . end . ### trace: swap contents B=Apple C=Book. write A=Hat B=Book C=Apple
+    D=Cat E=Dog . swap contents A=Hat B=Book. write A=Book B=Hat C=Apple D=Cat E=Dog
+    . swap contents A=Book D=Cat. write A=Cat B=Hat C=Apple D=Book E=Dog . end  final
+    state: answer A=Cat B=Hat C=Apple D=Book E=Dog end of result'
+- text: 'init A=Apple B=Book C=Hat D=Dog E=Cat operation swap C B . swap C A . swap
+    E B . swap E B . swap B D . end . ### trace: swap contents C=Hat B=Book. write
+    A=Apple B=Hat C=Book D=Dog E=Cat . swap contents C=Book A=Apple. write A=Book
+    B=Hat C=Apple D=Dog E=Cat . swap contents E=Cat B=Hat. write A=Book B=Cat C=Apple
+    D=Dog E=Hat . swap contents E=Hat B=Cat. write A=Book B=Hat C=Apple D=Dog E=Cat
+    . swap contents B=Hat D=Dog. write A=Book B=Dog C=Apple D=Hat E=Cat . end  final
+    state: answer A=Book B=Dog C=Apple D=Hat E=Cat end of result'
+examples_index:
+- text: 'init A=Cat B=Hat C=Apple D=Dog E=Book operation 1 swap B A . 2 swap E A .
+    3 swap E D . 4 swap A E . end . ### trace: step 1 swap contents B=Hat A=Cat. new
+    state: A=Hat B=Cat C=Apple D=Dog E=Book . step 2 swap contents E=Book A=Hat. new
+    state: A=Book B=Cat C=Apple D=Dog E=Hat . step 3 swap contents E=Hat D=Dog. new
+    state: A=Book B=Cat C=Apple D=Hat E=Dog . step 4 swap contents A=Book E=Dog. new
+    state: A=Dog B=Cat C=Apple D=Hat E=Book . end  final state: answer A=Dog B=Cat
+    C=Apple D=Hat E=Book end of result'
+- text: 'init A=Cat B=Dog C=Hat D=Apple E=Book operation 1 swap B D . 2 swap E C .
+    3 swap A B . 4 swap D C . 5 swap C B . 6 swap B C . end . ### trace: step 1 swap
+    contents B=Dog D=Apple. new state: A=Cat B=Apple C=Hat D=Dog E=Book . step 2 swap
+    contents E=Book C=Hat. new state: A=Cat B=Apple C=Book D=Dog E=Hat . step 3 swap
+    contents A=Cat B=Apple. new state: A=Apple B=Cat C=Book D=Dog E=Hat . step 4 swap
+    contents D=Dog C=Book. new state: A=Apple B=Cat C=Dog D=Book E=Hat . step 5 swap
+    contents C=Dog B=Cat. new state: A=Apple B=Dog C=Cat D=Book E=Hat . step 6 swap
+    contents B=Dog C=Cat. new state: A=Apple B=Cat C=Dog D=Book E=Hat . end  final
+    state: answer A=Apple B=Cat C=Dog D=Book E=Hat end of result'
+- text: 'init A=Cat B=Hat C=Dog D=Book E=Apple operation 1 swap E C . 2 swap A D .
+    3 swap E A . 4 swap D A . 5 swap E C . end . ### trace: step 1 swap contents E=Apple
+    C=Dog. new state: A=Cat B=Hat C=Apple D=Book E=Dog . step 2 swap contents A=Cat
+    D=Book. new state: A=Book B=Hat C=Apple D=Cat E=Dog . step 3 swap contents E=Dog
+    A=Book. new state: A=Dog B=Hat C=Apple D=Cat E=Book . step 4 swap contents D=Cat
+    A=Dog. new state: A=Cat B=Hat C=Apple D=Dog E=Book . step 5 swap contents E=Book
+    C=Apple. new state: A=Cat B=Hat C=Book D=Dog E=Apple . end  final state: answer
+    A=Cat B=Hat C=Book D=Dog E=Apple end of result'
+- text: 'init A=Hat B=Apple C=Book D=Cat E=Dog operation 1 swap B C . 2 swap A B .
+    3 swap A D . end . ### trace: step 1 swap contents B=Apple C=Book. new state:
+    A=Hat B=Book C=Apple D=Cat E=Dog . step 2 swap contents A=Hat B=Book. new state:
+    A=Book B=Hat C=Apple D=Cat E=Dog . step 3 swap contents A=Book D=Cat. new state:
+    A=Cat B=Hat C=Apple D=Book E=Dog . end  final state: answer A=Cat B=Hat C=Apple
+    D=Book E=Dog end of result'
+- text: 'init A=Apple B=Book C=Hat D=Dog E=Cat operation 1 swap C B . 2 swap C A .
+    3 swap E B . 4 swap E B . 5 swap B D . end . ### trace: step 1 swap contents C=Hat
+    B=Book. new state: A=Apple B=Hat C=Book D=Dog E=Cat . step 2 swap contents C=Book
+    A=Apple. new state: A=Book B=Hat C=Apple D=Dog E=Cat . step 3 swap contents E=Cat
+    B=Hat. new state: A=Book B=Cat C=Apple D=Dog E=Hat . step 4 swap contents E=Hat
+    B=Cat. new state: A=Book B=Hat C=Apple D=Dog E=Cat . step 5 swap contents B=Hat
+    D=Dog. new state: A=Book B=Dog C=Apple D=Hat E=Cat . end  final state: answer
+    A=Book B=Dog C=Apple D=Hat E=Cat end of result'

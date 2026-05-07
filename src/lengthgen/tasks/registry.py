@@ -3,15 +3,20 @@ from dataclasses import dataclass, field
 from typing import Callable
 
 from .implementations.boolean_eval import generate_boolean_dataset
+from .implementations.boolean_prompting import generate_boolean_prompting_dataset
 from .implementations.parity import generate_parity_dataset
 from .implementations.permutation import generate_permutation_dataset
 from .implementations.permutation_binary import generate_permutation_binary_dataset
+from .implementations.permutation_prompting import generate_permutation_prompting_dataset
 
 class TaskType(str, Enum):
     PERMUTATION = "permutation"
     PERMUTATION_BINARY = "permutation_binary"
+    PERMUTATION_PROMPTING = "permutation_prompting"
     BOOLEAN = "boolean"
+    BOOLEAN_PROMPTING = "boolean_prompting"
     PARITY = "parity"
+
 
 @dataclass
 class TaskConfig:
@@ -72,6 +77,31 @@ TASK_CONFIGS = {
         val_params=dict(
             repetitive=False,
             repetitive_mix=False
+        ),
+    ),
+    TaskType.PERMUTATION_PROMPTING: TaskConfig(
+        generator=generate_permutation_prompting_dataset,
+        base_params=dict(
+            num_objects=5,
+            include_indices=False,
+        ),
+        train_params=dict(
+            repetitive=False,
+        ),
+        val_params=dict(
+            repetitive=False,
+        ),
+    ),
+    TaskType.BOOLEAN_PROMPTING: TaskConfig(
+        generator=generate_boolean_prompting_dataset,
+        base_params=dict(
+            include_indices=False,
+        ),
+        train_params=dict(
+            random_start_index=False
+        ),
+        val_params=dict(
+            random_start_index=False
         ),
     ),
 }

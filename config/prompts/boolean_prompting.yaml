@@ -1,0 +1,35 @@
+instruction_base: 'Your task is to compute the truth value of a boolean formula. You
+  will be given a boolean formula containing the operators NOT, AND, OR, and the literals
+  true and false. Evaluate the formula step by step in post-order. Evaluate the leaves
+  first and the root last. For each step, write down the currently evaluated subformula
+  and then calculate its truth value. Your final answer must be exactly "answer T"
+  or "answer F" with no other formatting. Give your final answer in this format. When
+  the formula is fully evaluated, output the final state from the last operation.
+  Finish your answer with ''''end of result''''. Below are examples of how to correctly
+  execute the operations. '
+instruction_index: "\"Your task is to compute the truth value of a boolean formula.\
+  \ You\nwill be given a boolean formula containing the operators NOT, AND, OR, and\
+  \ the literals\ntrue and false. \nThe formula has been annotated with index hints\
+  \ that indicate the order in which the formula must be evaluated.\nSyntax Rules:\n\
+  - Literals: \"<index> <boolean>\" (e.g., \"0 true\")\n- Unary Operations: \"[ <operand_index>\
+  \ ] <index> NOT\" (e.g., \"[ 0 ] 1 NOT\")\n- Binary Operations: \"[ <left_index>\
+  \ , <right_index> ] <index> <AND/OR>\" (e.g., \"[ 0 , 1 ] 2 AND\")\nFor each step,\
+  \ output the index number followed\nby ''T'' if the respective subformula evaluates\
+  \ to true, or ''F'' if it evaluates to false. \nWhen the formula is fully evaluated,\
+  \ output the final state from the last operation.\nFinish your answer with 'end\
+  \ of result'.\nDo not output any natural language.\nBelow are examples of how to\
+  \ correctly execute the operations.\n\"\n"
+examples_base:
+- text: 'NOT NOT true ### trace: T F T answer T end of result'
+- text: '( true AND false ) ### trace: T F F answer F end of result'
+- text: 'NOT NOT true ### trace: T F T answer T end of result'
+- text: '( NOT false AND false ) ### trace: F T F F answer F end of result'
+- text: '( false AND false ) ### trace: F F F answer F end of result'
+examples_index:
+- text: '[ 1 ] 2 NOT [ 0 ] 1 NOT 0 true ### trace: 0 T 1 F 2 T answer T end of result'
+- text: '( 0 true [ 0,1 ] 2 AND 1 false ) ### trace: 0 T 1 F 2 F answer F end of result'
+- text: '[ 1 ] 2 NOT [ 0 ] 1 NOT 0 true ### trace: 0 T 1 F 2 T answer T end of result'
+- text: '( [ 0 ] 1 NOT 0 false [ 1,2 ] 3 AND 2 false ) ### trace: 0 F 1 T 2 F 3 F
+    answer F end of result'
+- text: '( 0 false [ 0,1 ] 2 AND 1 false ) ### trace: 0 F 1 F 2 F answer F end of
+    result'

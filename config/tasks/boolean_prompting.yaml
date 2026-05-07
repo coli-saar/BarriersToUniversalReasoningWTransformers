@@ -1,0 +1,16 @@
+fixed:
+  task: "boolean_prompting"
+  min_test_len: 10
+  max_test_len: 30
+  num_eval_samples: 100
+  step_size: 5
+  max_new_tokens: 1024
+  task_kwargs:
+      use_word_operators: True
+      include_indices: False # change as required
+
+sweep:
+  n_shots_list: [5]
+  seeds: [44]
+  # models: ["meta-llama/Llama-3.3-70B-Instruct-Turbo","Qwen/Qwen2.5-7B-Instruct-Turbo","mistralai/Mistral-Small-24B-Instruct-2501"]
+  models: ["Qwen/Qwen2.5-7B-Instruct-Turbo"]
