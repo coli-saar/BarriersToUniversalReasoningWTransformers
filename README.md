@@ -4,5 +4,4 @@ This repo contains code for the paper "Barriers to Universal Reasoning With Tran
 
 ### TODO: 
  - more detailed instructions
- - add prompting code
  - add result scripts
