@@ -98,6 +98,7 @@ def evaluate_model(
         
         prompts = []
         targets = []
+        gt_full_texts = []
         try:
             for i, item in enumerate(test_dataset):
                 text = item["text"]
@@ -114,10 +115,12 @@ def evaluate_model(
 
                     prompts.append(prompt_part)
                     targets.append(target_answer)
+                    gt_full_texts.append(text)
                 else:
                     print(f"Warning: Separator not found in sample {i}")
                     prompts.append(None)
                     targets.append(None)
+                    gt_full_texts.append(None)
     
             num_batches = (len(prompts) + batch_size - 1) // batch_size
             for batch_idx in tqdm(range(num_batches), desc=f"Length {length}"):
@@ -126,6 +129,7 @@ def evaluate_model(
 
                 batch_prompts = prompts[start_idx:end_idx]
                 batch_targets = targets[start_idx:end_idx]
+                batch_gt_texts = gt_full_texts[start_idx:end_idx]
 
                 valid_indices = [i for i, p in enumerate(batch_prompts) if p is not None]
                 if not valid_indices:
@@ -133,6 +137,7 @@ def evaluate_model(
 
                 valid_prompts = [batch_prompts[i] for i in valid_indices]
                 valid_targets = [batch_targets[i] for i in valid_indices]
+                valid_gt_texts = [batch_gt_texts[i] for i in valid_indices]
 
                 inputs = tokenizer(
                     valid_prompts, 
@@ -170,7 +175,8 @@ def evaluate_model(
                             "target": target_answer,
                             "prediction": prediction,
                             "full_output": full_out,
-                            "prompt": valid_prompts[local_idx]
+                            "prompt": valid_prompts[local_idx],
+                            "gt_full_text": valid_gt_texts[local_idx]
                         })
         except torch.cuda.OutOfMemoryError:
             raise
