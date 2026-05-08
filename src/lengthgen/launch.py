@@ -53,7 +53,7 @@ def construct_run_name(run_config, seed, length, wdecay, lr, pos_dropout_prob, r
     num_objects = run_config.get("task_kwargs", {}).get("num_objects", 5)
     dropout_str = str(pos_dropout_prob).replace(".", "")
     rep_ratio_str = str(rep_ratio).replace(".", "")
-    obj_str = str(num_objects) if task == task_registry.TaskType.PERMUTATION or task == task_registry.TaskType.PERMUTATION_NEW else ""
+    obj_str = str(num_objects) if task == task_registry.TaskType.PERMUTATION else ""
     wdecay = str(wdecay).replace(".", "")
     lr = str(lr).replace(".", "")
 
