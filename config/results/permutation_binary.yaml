@@ -1,0 +1,31 @@
+tasks:
+  parity:
+    train_lengths: [30]
+    wandb_project: cot_permutation_binary
+    eval_lengths:
+      start_offset: -10
+      ood_test_factor: 2.0
+      step: 1
+    positional_encodings: ape_xsmall
+
+conditions:
+  - name: index
+    include_indices: True
+    delta_cot: False
+  - name: value_change
+    include_indices: True
+    delta_cot: True
+  - name: base
+    include_indices: False
+    delta_cot: False
+
+selection:
+  top_n: 3
+  best_ckpt: False
+
+evaluation:
+  num_test_samples: 500
+  test_seed: 9999 # held out seed
+  batch_size: 128
+
+wandb_entity: your_wandb_name
