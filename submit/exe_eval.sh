@@ -67,7 +67,7 @@ $PY_CMD "${PROJECT_ROOT}/src/lengthgen/evaluate_model.py" \
     --model_path $MODEL_PATH \
     --min_len 30 \
     --max_len 50 \
-    --out_path "/scratch/okraus/test/new" \
+    --out_path "/path/where/output/should/go" \
     --num_samples 100 \
     --starting_aid 0 \
     --task_kwargs '{"delta_cot": True}'
