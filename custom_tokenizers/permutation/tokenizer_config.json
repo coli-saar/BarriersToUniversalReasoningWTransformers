@@ -23,80 +23,14 @@
       "rstrip": false,
       "single_word": false,
       "special": true
-    },
-    "440": {
-      "content": "<|trace|>",
-      "lstrip": false,
-      "normalized": false,
-      "rstrip": false,
-      "single_word": false,
-      "special": true
     }
   },
   "backend": "custom",
   "box_labels": [],
   "eos_token": "<|endoftext|>",
-  "long_splits": {
-    "Alligator": [
-      "ĠAll",
-      "iga",
-      "tor"
-    ],
-    "Armadillo": [
-      "ĠArma",
-      "dillo"
-    ],
-    "Butterfly": [
-      "ĠBut",
-      "ter",
-      "fly"
-    ],
-    "Dragon": [
-      "ĠDra",
-      "gon"
-    ],
-    "Monkey": [
-      "ĠMon",
-      "key"
-    ],
-    "Salamander": [
-      "ĠSala",
-      "man",
-      "der"
-    ],
-    "Spider": [
-      "ĠSpi",
-      "der"
-    ]
-  },
   "loss_weights": {},
-  "max_start_index": 400,
   "model_max_length": 1000000000000000019884624838656,
   "pad_token": "<|padding|>",
-  "short_items": [
-    "Cat",
-    "Dog",
-    "Apple",
-    "Book",
-    "Hat",
-    "A",
-    "B",
-    "C",
-    "D",
-    "E"
-  ],
-  "structure_words": [
-    "init",
-    "operation",
-    "swap",
-    "write",
-    "end",
-    "load",
-    "line",
-    "tape",
-    "."
-  ],
   "tokenizer_class": "AlgorithmicTaskTokenizer",
-  "trace_token": "<|trace|>",
   "unk_token": "<|unk|>"
 }

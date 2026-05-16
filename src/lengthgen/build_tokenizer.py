@@ -48,6 +48,11 @@ def _get_permutation_weights():
 
 
 TASK_REGISTRY = {
+    task_registry.TaskType.DYCK_LANGUAGE: TaskVocabConfig(
+        short_items=["(", ")", "[", "]", "{", "}"
+                     ],
+    ),
+
     task_registry.TaskType.PERMUTATION: TaskVocabConfig(
         short_items=["Cat", "Dog", "Apple", "Book", "Hat", "A", "B", "C", "D", "E"
                      ],
@@ -110,13 +115,7 @@ class AlgorithmicTaskTokenizer(PreTrainedTokenizer):
             self._vocab = self._build_vocab(pad_tok, eos_tok, unk_tok)
             
         self._id_to_token = {v: k for k, v in self._vocab.items()}
-
-        kwargs["max_start_index"] = self.max_start_index
-        kwargs["long_splits"] = self.long_splits
-        kwargs["short_items"] = self.short_items
-        kwargs["structure_words"] = self.structure_words
-        kwargs["trace_token"] = self.trace_token
-
+        
         kwargs.setdefault("pad_token", pad_tok)
         kwargs.setdefault("eos_token", eos_tok)
         kwargs.setdefault("unk_token", unk_tok)
@@ -192,8 +191,8 @@ class AlgorithmicTaskTokenizer(PreTrainedTokenizer):
 
 def main():
     for current_task, task_config in TASK_REGISTRY.items():
-        print(f"Building tokenizer for: {current_task.value}")
         tok = AlgorithmicTaskTokenizer(**asdict(task_config))
+        print(f"Building tokenizer for: {current_task.value}")
         print(f"Vocab size: {tok.vocab_size}")
         
         if current_task == task_registry.TaskType.PERMUTATION:
