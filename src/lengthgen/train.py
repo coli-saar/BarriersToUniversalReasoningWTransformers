@@ -341,7 +341,7 @@ def train(
     if random_pos:
         collator = RandomOffsetCollator(
             base_collator,
-            model_config.max_position_embeddings,
+            model_config.n_positions,
             seed=seed
         )
     else:
@@ -364,6 +364,12 @@ def train(
         os.environ["WANDB_PROJECT"] = f"cot_{task}"
         os.environ["WANDB_TAGS"] = f"{positional_encodings},{train_instances_str}"
         os.environ["WANDB_NAME"] = run_name
+        # Explicitly surface the key wandb needs
+        api_key = os.environ.get("WANDB_API_KEY")
+        if api_key:
+            wandb.login(key=api_key)
+        else:
+            raise RuntimeError("WANDB_API_KEY not found in environment variables.")
 
     if torch.distributed.is_initialized():
         num_gpus = torch.distributed.get_world_size()
@@ -393,7 +399,7 @@ def train(
         save_strategy="no",
         #save_steps=EVAL_STEPS,
         #save_total_limit=1,
-        report_to="wandb",
+        report_to="wandb" if is_main_process else "none",
         dataloader_num_workers=DATA_LOADER_NUM_WORKERS,
         remove_unused_columns=True,
         bf16=torch.cuda.is_bf16_supported(),
